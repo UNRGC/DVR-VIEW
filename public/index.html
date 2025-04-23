@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Reproductor de Videos</title>
+    </head>
+    <body>
+        <h1>Lista de Videos</h1>
+        <ul id="videoList"></ul>
+
+        <video id="player" width="640" height="360" controls>
+            <source id="videoSource" src="" type="video/webm" />
+            Tu navegador no soporta este formato.
+        </video>
+
+        <script>
+            fetch("/api/videos")
+                .then((res) => res.json())
+                .then((files) => {
+                    const list = document.getElementById("videoList");
+                    files.forEach((file) => {
+                        const li = document.createElement("li");
+                        const link = document.createElement("a");
+                        link.href = `/video/${file}`;
+                        link.textContent = file;
+                        link.addEventListener("click", function (e) {
+                            e.preventDefault();
+                            document.getElementById("videoSource").src = this.href;
+                            document.getElementById("player").load();
+                            document.getElementById("player").play();
+                        });
+                        li.appendChild(link);
+                        list.appendChild(li);
+                    });
+                });
+        </script>
+    </body>
+</html>

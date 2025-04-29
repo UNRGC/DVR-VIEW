@@ -1,64 +1,106 @@
-const express = require("express");
-const session = require("express-session");
-const fs = require("fs");
-const path = require("path");
+import express from "express";
+import session from "express-session";
+import cors from "cors";
+import loginRoutes from "./src/routes/loginRoutes.js";
+import streamRoutes from "./src/routes/streamRoutes.js";
+import thumbRoutes from "./src/routes/thumbsRoutes.js";
+import videosRoutes from "./src/routes/videosRoutes.js";
+import downloadsRoutes from "./src/routes/downloadsRoutes.js";
+import os from "os";
+import { config } from "dotenv";
+// import bcrypt from "bcrypt";
 
+// Carga las variables de entorno
+config();
+
+// Configuración del puerto
+const PORT = process.env.PORT || 3000;
+
+// Obtener la dirección IP de la máquina
+const getIPAddress = () => {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === "IPv4" && !iface.internal) {
+                return iface.address;
+            }
+        }
+    }
+    return "localhost";
+};
+
+// Crear la aplicación Express
 const app = express();
-const VIDEO_DIR = "/";
 
-const USER = "admin";
-const PASS = "12345678";
+// Configurar Express para que pueda parsear JSON
+app.use(express.json());
 
+// Configurar CORS
+app.use(cors());
+
+// Configurar la sesión
 app.use(
     session({
-        secret: "secreto_super_seguro",
+        secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true,
     })
 );
 
-app.use(express.static("public"));
-
-function authMiddleware(req, res, next) {
-    if (req.session && req.session.authenticated) {
-        return next();
+// Middleware para manejar errores de JSON mal formados
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+        console.error("Error de JSON mal formado:", err.message);
+        res.status(400).json({ message: "JSON mal formado" });
+        return;
     }
+    next();
+});
 
-    const auth = req.headers.authorization;
-    if (!auth) {
-        res.setHeader("WWW-Authenticate", 'Basic realm="Videos"');
-        return res.status(401).send("Authentication required.");
-    }
+// Rutas
+app.use("/", loginRoutes);
+app.use("/stream", streamRoutes);
+app.use("/thumbs", thumbRoutes);
+app.use("/videos", videosRoutes);
+app.use("/downloads", downloadsRoutes);
 
-    const [type, credentials] = auth.split(" ");
-    const [user, pass] = Buffer.from(credentials, "base64").toString().split(":");
+// Archivos estáticos
+app.use(express.static("public"), express.static("private/video/hls"));
 
-    if (user === USER && pass === PASS) {
-        req.session.authenticated = true;
-        return next();
-    }
+// Iniciar el servidor
+let server = null;
+server = app.listen(PORT, () => {
+    const ipAddress = getIPAddress();
+    console.debug(`Servidor iniciado en http://${ipAddress}:${PORT}`);
+});
 
-    res.status(403).send("Access denied");
-}
+// Manejar eventos antes de que la API termine
+const shutdown = () => {
+    console.debug("Cerrando el servidor...");
 
-app.use(authMiddleware);
-
-// Lista de videos
-app.get("/api/videos", (req, res) => {
-    fs.readdir(VIDEO_DIR, (err, files) => {
-        if (err) return res.status(500).json({ error: "No se pudo leer el directorio." });
-
-        const videos = files.filter((file) => file.endsWith(".mkv"));
-        res.json(videos);
+    // Cerrar conexiones abiertas y liberar recursos
+    server.close(() => {
+        console.debug("Servidor cerrado correctamente");
+        process.exit(0);
     });
-});
 
-// Reproducir video
-app.get("/video/:filename", (req, res) => {
-    const filePath = path.join(VIDEO_DIR, req.params.filename);
-    res.sendFile(filePath);
-});
+    // Si hay procesos asíncronos, dar tiempo para terminarlos
+    setTimeout(() => {
+        console.warn("Forzando cierre...");
+        process.exit(1);
+    }, 5000);
+};
 
-app.listen(3000, () => {
-    console.log("Servidor corriendo en http://localhost:3000");
+// Capturar señales del sistema
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+
+/*
+bcrypt.hash("Sim@2025", 10, (err, hash) => {
+    if (err) {
+        console.error(err);
+        return;
+    }
+    console.log("Hash:", hash);
 });
+*/

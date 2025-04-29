@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Seleccionar Cámara RTSP</title>
+        <style>
+            body {
+                margin: 0;
+                background: #000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                height: 100vh;
+            }
+            video {
+                width: 80%;
+                height: auto;
+                background: #333;
+            }
+            select {
+                margin: 10px;
+                padding: 10px;
+                font-size: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 style="color: white">Selecciona una cámara</h1>
+
+        <!-- Selector de cámaras -->
+        <select id="cameraSelect">
+            <option value="1">Cámara 1</option>
+            <option value="2">Cámara 2</option>
+        </select>
+
+        <!-- Video -->
+        <video id="video" controls autoplay muted></video>
+
+        <script>
+            const video = document.getElementById("video");
+            const cameraSelect = document.getElementById("cameraSelect");
+
+            // Función para cambiar el video según la cámara seleccionada
+            cameraSelect.addEventListener("change", function () {
+                const selectedCamera = cameraSelect.value;
+                if (selectedCamera == "1") {
+                    video.src = "/stream1"; // Cambiar a cámara 1
+                } else if (selectedCamera == "2") {
+                    video.src = "/stream2"; // Cambiar a cámara 2
+                }
+            });
+
+            // Inicializar con la cámara 1 al cargar la página
+            video.src = "/stream1";
+        </script>
+    </body>
+</html>

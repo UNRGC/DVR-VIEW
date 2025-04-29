@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Visor DVR - Inicio</title>
+        <link rel="shortcut icon" href="/img/icon.png" type="image/x-icon" />
+        <link rel="stylesheet" href="/css/player.css" />
+        <link href="//vjs.zencdn.net/8.23.3/video-js.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    </head>
+    <body>
+        <section class="main">
+            <div class="player">
+                <select id="camera" title="Seleccionar cámara">
+                    <option value="1">Entrada</option>
+                    <option value="2">Sala</option>
+                </select>
+                <video id="hls-player" class="video-js vjs-default-skin" src="/stream/1" controls autoplay data-setup="{}">
+                    <source src="/stream/1" type="video/mp4" />
+                    <p class="vjs-no-js">
+                        Tu navegador no soporta la reproducción de videos HTML5.
+                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                    </p>
+                </video>
+            </div>
+            <div class="list">
+                <input type="date" title="Filtro de fechas" id="date" />
+                <div class="list container" id="list"></div>
+            </div>
+        </section>
+        <footer>
+            <button title="Salir" id="logout"><i class="bi bi-door-open"></i></button>
+        </footer>
+
+        <script src="/js/player.js" type="module"></script>
+        <script src="//vjs.zencdn.net/8.23.3/video.min.js"></script>
+    </body>
+</html>

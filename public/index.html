@@ -1,38 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
         <meta charset="UTF-8" />
-        <title>Reproductor de Videos</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Visor DVR - Autenticación</title>
+        <link rel="shortcut icon" href="img/icon.png" type="image/x-icon" />
+        <link rel="stylesheet" href="css/index.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     </head>
     <body>
-        <h1>Lista de Videos</h1>
-        <ul id="videoList"></ul>
+        <section class="background">
+            <div class="container">
+                <h1>
+                    <div class="circle"></div>
+                    Visor DVR
+                </h1>
+                <form id="formLogin">
+                    <label for="userName"><i class="bi bi-person-fill"></i> Usuario:</label>
+                    <input type="text" id="userName" placeholder="Ingresa tu usuario" required />
+                    <label for="password"><i class="bi bi-lock-fill"></i> Contraseña:</label>
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Ingresa tu contraseña" required />
+                        <button type="button" id="eye" title="Ver contraseña"><i class="bi bi-eye"></i></button>
+                    </div>
+                    <button type="submit"><i class="bi bi-key-fill"></i> Ingresar</button>
+                </form>
+            </div>
 
-        <video id="player" width="640" height="360" controls>
-            <source id="videoSource" src="" type="video/webm" />
-            Tu navegador no soporta este formato.
-        </video>
-
-        <script>
-            fetch("/api/videos")
-                .then((res) => res.json())
-                .then((files) => {
-                    const list = document.getElementById("videoList");
-                    files.forEach((file) => {
-                        const li = document.createElement("li");
-                        const link = document.createElement("a");
-                        link.href = `/video/${file}`;
-                        link.textContent = file;
-                        link.addEventListener("click", function (e) {
-                            e.preventDefault();
-                            document.getElementById("videoSource").src = this.href;
-                            document.getElementById("player").load();
-                            document.getElementById("player").play();
-                        });
-                        li.appendChild(link);
-                        list.appendChild(li);
-                    });
-                });
-        </script>
+            <script src="js/index.js" type="module"></script>
+        </section>
     </body>
 </html>

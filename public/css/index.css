@@ -1,0 +1,88 @@
+@import url("global.css");
+.background {
+    width: 100vw;
+    height: 100vh;
+    align-content: center;
+    background-color: rgba(30, 42, 56, 0.9);
+}
+.container {
+    margin: auto;
+    padding: 32px;
+    width: 512px;
+    height: 70%;
+    border-radius: 32px;
+    align-content: center;
+    box-sizing: border-box;
+    background: rgba(47, 62, 78, 0.6);
+    backdrop-filter: blur(2px);
+    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2), -10px -10px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+body::after {
+    content: "© Soluciones Integrales Mercasoft, 2025";
+    font-family: Arial, sans-serif;
+    font-size: 0.8rem;
+    color: #f5f7fa;
+    position: absolute;
+    bottom: 16px;
+    width: 100%;
+    text-align: center;
+}
+#formLogin {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+h1 {
+    font-size: 3rem;
+    margin: 0 0 16px 0;
+}
+
+.bounce {
+    animation: bounceLabel 0.4s ease-out;
+}
+
+@keyframes bounceLabel {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@media only screen and (max-width: 991px) {
+    body {
+        animation: moveBackground 120s linear infinite;
+    }
+
+    .container {
+        width: 90%;
+        height: auto;
+        padding: 32px 16px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    button[type="submit"] {
+        width: 70%;
+    }
+
+    @keyframes moveBackground {
+        0% {
+            background-position: 0% 0%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 100%;
+        }
+    }
+}

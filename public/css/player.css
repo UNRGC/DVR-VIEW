@@ -1,0 +1,141 @@
+@import url("global.css");
+.main {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 2.5fr 1fr;
+    background-color: rgba(30, 42, 56, 0.9);
+}
+.main::before {
+    content: "\F2FF";
+    font-family: Bootstrap-Icons;
+    font-weight: normal;
+    font-size: 1.4rem;
+    position: absolute;
+    top: 24px;
+    left: 32px;
+}
+select {
+    width: inherit;
+    font-size: 1.3rem;
+}
+.video-js {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2), -5px -5px 10px rgba(0, 0, 0, 0.2);
+}
+video:focus,
+video:active {
+    appearance: none;
+    outline: none !important;
+    border: none !important;
+}
+.player,
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    height: calc(100vh - 32px);
+}
+.list input {
+    width: inherit;
+    font-size: 1.3rem;
+    box-shadow: 5px 5px 5px rgba(51, 62, 75, 0.2), -5px -5px 5px rgba(51, 62, 75, 0.2);
+}
+.container {
+    height: 100%;
+    overflow: auto;
+}
+.video {
+    display: grid;
+    grid-template-columns: 1.5fr 3fr 0.5fr;
+    gap: 8px;
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    align-items: center;
+    text-align: center;
+    background: rgba(47, 62, 78, 0.6);
+    backdrop-filter: blur(2px);
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2), -5px -5px 20px rgba(0, 0, 0, 0.2);
+}
+.video img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+button {
+    text-align: center;
+    padding: 16px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+}
+footer {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #2e86de;
+    text-align: center;
+    z-index: 1;
+}
+@media only screen and (max-width: 991px) {
+    body {
+        animation: moveBackground 120s linear infinite;
+    }
+    .main {
+        grid-template-columns: 1fr;
+        grid-template-rows: 50% 50%;
+    }
+    .player,
+    .list {
+        height: auto;
+    }
+    .list {
+        padding-top: 0;
+    }
+    .video {
+        grid-template-columns: 1fr 3fr 0.5fr;
+        font-size: 1.2rem;
+        box-shadow: none;
+    }
+    footer {
+        left: 16px;
+    }
+
+    @keyframes moveBackground {
+        0% {
+            background-position: 0% 0%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 100%;
+        }
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .main {
+        grid-template-columns: 1fr;
+        grid-template-rows: 40% 60%;
+    }
+    .main::before {
+        top: 21px;
+        left: 32px;
+    }
+    select,
+    .list input {
+        font-size: 1.1rem;
+    }
+    .video {
+        grid-template-columns: 2fr 3fr 0.5fr;
+        font-size: 1rem;
+    }
+}

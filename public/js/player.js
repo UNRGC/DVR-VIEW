@@ -1,5 +1,5 @@
 import { alertConfirm, alertLoading, alertMessage, alertToast } from "./alert.js";
-import { deleteDownload, getDownload, getVideos, logout, closeStream } from "./api.js";
+import { getVideos, logout, closeStream } from "./api.js";
 
 const cameraInput = document.getElementById("camera");
 const videoPlayer = document.querySelector("video");
@@ -8,6 +8,9 @@ const dateInput = document.getElementById("date");
 const listVideos = document.getElementById("list");
 
 const logoutButton = document.getElementById("logout");
+
+// Obtener la lista de videos
+let list = [];
 
 // Función para obtener la fecha del nombre del video
 const getDate = (filename) => {
@@ -33,7 +36,9 @@ const createList = async () => {
 
     try {
         // Obtener la lista de videos
-        const list = await getVideos(cameraInput.value);
+        if (!list.length) {
+            list = await getVideos(cameraInput.value);
+        }
 
         // Crear video en vivo
         directElement.classList.add("video");
@@ -97,8 +102,9 @@ const createList = async () => {
                 await closeStream();
                 changeSource(videoPath);
             } else {
-                const videoPath = `/videos/${cameraInput.value}/${videoName.split("_large")[0]}.mkv`;
+                const videoPath = `/videos/${cameraInput.value}/${videoName.split("_large")[0]}.mp4`;
                 alertLoading("Cargando video", "Cargando video, por favor espere...");
+                await closeStream();
                 changeSource(videoPath);
             }
         });
@@ -111,12 +117,10 @@ const createList = async () => {
                 // Confirmar si se desea descargar el video
                 if (await alertConfirm("Descargar video", "¿Desea descargar el video?", "question")) {
                     try {
-                        // Obtener el video a descargar
-                        const response = await getDownload(cameraInput.value, `${videoName.split("_large")[0]}`);
-
-                        alertToast(null, "Video descargado %", "success", 3000);
                         // Abrir el video en una nueva pestaña
-                        window.open(response, "_blank");
+                        window.open(`/videos/${cameraInput.value}/${videoName.split("_large")[0]}.mp4`, "_blank");
+                        // Alerta de descarga exitosa
+                        alertToast(null, "Video descargado %", "success", 3000);
                     } catch (error) {
                         // Manejo de errores al descargar el video
                         console.error("Error:", error);
@@ -162,7 +166,6 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutButton.addEventListener("click", async () => {
         try {
             // Eliminar la descarga y cerrar sesión
-            await deleteDownload();
             await closeStream();
             await logout();
         } catch (error) {
@@ -176,7 +179,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Cierra la transmisión y elimina las descargas al cerrar la ventana
     window.addEventListener("beforeunload", async () => {
-        await deleteDownload();
         await closeStream();
     });
 

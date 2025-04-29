@@ -5,7 +5,6 @@ import loginRoutes from "./src/routes/loginRoutes.js";
 import streamRoutes from "./src/routes/streamRoutes.js";
 import thumbRoutes from "./src/routes/thumbsRoutes.js";
 import videosRoutes from "./src/routes/videosRoutes.js";
-import downloadsRoutes from "./src/routes/downloadsRoutes.js";
 import os from "os";
 import { config } from "dotenv";
 // import bcrypt from "bcrypt";
@@ -35,6 +34,16 @@ const app = express();
 // Configurar Express para que pueda parsear JSON
 app.use(express.json());
 
+// Configurar la sesión
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+    })
+);
+app.set("trust proxy", 1);
+
 // Configurar CORS
 app.use(
     cors({
@@ -42,18 +51,9 @@ app.use(
             if (!origin || origin.startsWith("http://localhost:3000")) {
                 callback(null, true);
             } else {
-                callback(new Error("Not allowed by CORS"));
+                callback(new Error("No permitido por CORS"));
             }
         },
-    })
-);
-
-// Configurar la sesión
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: true,
     })
 );
 
@@ -72,7 +72,6 @@ app.use("/", loginRoutes);
 app.use("/stream", streamRoutes);
 app.use("/thumbs", thumbRoutes);
 app.use("/videos", videosRoutes);
-app.use("/downloads", downloadsRoutes);
 
 // Archivos estáticos
 app.use(express.static("public"), express.static("private/video/hls"));

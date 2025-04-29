@@ -149,44 +149,6 @@ export const getVideo = async (video) => {
     }
 };
 
-// Función para obtener un video específico para descargar
-export const getDownload = async (camera, video) => {
-    // Mostrar un mensaje de carga mientras se procesa la solicitud
-    alertLoading("Descargando video", "Convirtiendo, por favor espere...");
-
-    // Realizar la solicitud para descargar el video al servidor
-    const response = await fetch(`/downloads/${camera}/${video}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        redirect: "follow",
-    });
-
-    // Verificar si la respuesta es exitosa
-    if (response.ok) {
-        // retornar el video
-        return response.url;
-    } else {
-        // Si la respuesta no es exitosa, obtener los datos de error
-        const errorData = await response.json();
-        // Mostrar un mensaje de error
-        alertMessage("Error", errorData.message, "error", 3000);
-        return null;
-    }
-};
-
-// Función para eliminar los videos descargados
-export const deleteDownload = async () => {
-    // Realizar la solicitud para eliminar los videos descargados al servidor
-    await fetch("/downloads", {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-};
-
 // Función para cerrar el stream
 export const closeStream = async () => {
     // Realizar la solicitud para cerrar el stream al servidor

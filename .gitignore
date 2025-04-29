@@ -137,5 +137,5 @@ dist
 .pnp.*
 
 
-#Otos
-hls
+#Otros
+video/

@@ -8,7 +8,7 @@ const getVideoHandler = async (req, res) => {
         // Llama a la función para obtener el video
         const filePath = await getVideo(camera, video);
         // Envía el video como respuesta
-        res.status(200).setHeader("Content-Type", "video/matroska").sendFile(filePath);
+        res.status(200).setHeader("Content-Type", "video/mp4").sendFile(filePath);
     } catch (error) {
         console.error("Error al obtener el video:", error.message);
         // Envía un error 404 si el archivo no existe

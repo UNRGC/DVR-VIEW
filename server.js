@@ -36,7 +36,17 @@ const app = express();
 app.use(express.json());
 
 // Configurar CORS
-app.use(cors());
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin || origin.startsWith("http://localhost:3000")) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
+    })
+);
 
 // Configurar la sesión
 app.use(
@@ -96,7 +106,7 @@ process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 
 /*
-bcrypt.hash("Sim@2025", 10, (err, hash) => {
+bcrypt.hash("hash", 10, (err, hash) => {
     if (err) {
         console.error(err);
         return;

@@ -9,7 +9,7 @@
     "keywords": [],
     "author": "Ulises Noriega",
     "license": "ISC",
-    "description": "Gestor gráfico de videograbaciones alojado en Debian 12",
+    "description": "Gestor gráfico de videograbaciones alojados en Debian 12",
     "dependencies": {
         "bcrypt": "^5.1.1",
         "cors": "^2.8.5",

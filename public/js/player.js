@@ -9,9 +9,6 @@ const listVideos = document.getElementById("list");
 
 const logoutButton = document.getElementById("logout");
 
-// Obtener la lista de videos
-let list = [];
-
 // Función para obtener la fecha del nombre del video
 const getDate = (filename) => {
     const videoParts = filename.split("_");
@@ -35,6 +32,9 @@ const createList = async (camera) => {
     const directElement = document.createElement("div");
 
     try {
+        // Obtener la lista de videos
+        const list = await getVideos(camera);
+
         // Crear video en vivo
         directElement.classList.add("video");
         directElement.innerHTML = `
@@ -46,15 +46,8 @@ const createList = async (camera) => {
                     `;
         listVideos.appendChild(directElement);
 
-        // Obtener la lista de videos
-        if (!list.length) {
-            list.push(await getVideos(camera));
-        } else if (!list[camera - 1]) {
-            list.push(await getVideos(camera));
-        }
-
         // Crear lista de videos
-        list[camera - 1].reverse().forEach((video) => {
+        list.reverse().forEach((video) => {
             const videoName = video.split("_large.jpg")[0];
             const videoElement = document.createElement("div");
 
@@ -117,6 +110,8 @@ const createList = async (camera) => {
                     // Confirmar si se desea descargar el video
                     if (await alertConfirm("Descargar video", "¿Desea descargar el video?", "question")) {
                         try {
+                            // Alerta de carga al iniciar la descarga
+                            alertLoading("Descargando video", "Por favor espere...");
                             // Abrir el video en una nueva pestaña
                             window.open(`/videos/${cameraInput.value}/${videoName.split("_large")[0]}.mp4`, "_blank");
                             // Alerta de descarga exitosa

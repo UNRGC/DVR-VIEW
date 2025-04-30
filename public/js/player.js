@@ -31,15 +31,10 @@ const getTimestamp = (filename) => {
 };
 
 // Función para obtener la lista de videos
-const createList = async () => {
+const createList = async (camera) => {
     const directElement = document.createElement("div");
 
     try {
-        // Obtener la lista de videos
-        if (!list.length) {
-            list = await getVideos(cameraInput.value);
-        }
-
         // Crear video en vivo
         directElement.classList.add("video");
         directElement.innerHTML = `
@@ -51,28 +46,32 @@ const createList = async () => {
                     `;
         listVideos.appendChild(directElement);
 
-        // Verificar si hay videos
-        if (list.length) {
-            // Crear lista de videos
-            list.reverse().forEach((video) => {
-                const videoName = video.split("_large.jpg")[0];
-                const videoElement = document.createElement("div");
+        // Obtener la lista de videos
+        if (!list.length) {
+            list.push(await getVideos(camera));
+        } else if (!list[camera - 1]) {
+            list.push(await getVideos(camera));
+        }
 
-                // Verificar si la fecha del video coincide con la fecha seleccionada
-                if (dateInput.value === getDate(videoName)) {
-                    // Crear elemento de video
-                    videoElement.classList.add("video");
-                    videoElement.innerHTML = `
+        // Crear lista de videos
+        list[camera - 1].reverse().forEach((video) => {
+            const videoName = video.split("_large.jpg")[0];
+            const videoElement = document.createElement("div");
+
+            // Verificar si la fecha del video coincide con la fecha seleccionada
+            if (dateInput.value === getDate(videoName)) {
+                // Crear elemento de video
+                videoElement.classList.add("video");
+                videoElement.innerHTML = `
                         <img src="/thumbs/${cameraInput.value}/${video}" alt="${video}" />
                         <span>${getTimestamp(videoName)}</span>
                         <button type="button" title="Descargar video">
                             <i class="bi bi-download"></i>
                         </button>
                     `;
-                    listVideos.appendChild(videoElement);
-                }
-            });
-        }
+                listVideos.appendChild(videoElement);
+            }
+        });
     } catch (error) {
         // Manejo de errores al obtener la lista de videos
         console.error("Error:", error);
@@ -87,24 +86,23 @@ const createList = async () => {
         const videoName = video.querySelector("img").src.split("/").pop().split(".jpg")[0];
 
         // Cambiar la fuente del video
-        const changeSource = (source) => {
+        const changeSource = async (source) => {
             videoPlayer.src = source;
             videoPlayer.querySelector("source").src = source;
             videoPlayer.load();
+            await closeStream();
         };
 
         // Agregar evento de clic al video
-        video.addEventListener("click", async () => {
+        video.addEventListener("click", () => {
             // Verificar si el video es en vivo o grabado
             if (videoName === "thumb") {
                 const videoPath = `/stream/${cameraInput.value}`;
                 alertLoading("Iniciando transmisión", "Cargando video, por favor espere...");
-                await closeStream();
                 changeSource(videoPath);
             } else {
                 const videoPath = `/videos/${cameraInput.value}/${videoName.split("_large")[0]}.mp4`;
                 alertLoading("Cargando video", "Cargando video, por favor espere...");
-                await closeStream();
                 changeSource(videoPath);
             }
         });
@@ -113,20 +111,23 @@ const createList = async () => {
         video.querySelectorAll("button").forEach((button) => {
             // Agregar evento de clic al botón de descarga
             button.addEventListener("click", async (event) => {
-                event.stopPropagation();
-                // Confirmar si se desea descargar el video
-                if (await alertConfirm("Descargar video", "¿Desea descargar el video?", "question")) {
-                    try {
-                        // Abrir el video en una nueva pestaña
-                        window.open(`/videos/${cameraInput.value}/${videoName.split("_large")[0]}.mp4`, "_blank");
-                        // Alerta de descarga exitosa
-                        alertToast(null, "Video descargado %", "success", 3000);
-                    } catch (error) {
-                        // Manejo de errores al descargar el video
-                        console.error("Error:", error);
-                        alertMessage("Error al descargar", error.message, "error", 3000).finally(() => {
-                            window.location.reload();
-                        });
+                // Verificar si el video es en vivo o grabado
+                if (videoName !== "thumb") {
+                    event.stopPropagation();
+                    // Confirmar si se desea descargar el video
+                    if (await alertConfirm("Descargar video", "¿Desea descargar el video?", "question")) {
+                        try {
+                            // Abrir el video en una nueva pestaña
+                            window.open(`/videos/${cameraInput.value}/${videoName.split("_large")[0]}.mp4`, "_blank");
+                            // Alerta de descarga exitosa
+                            alertToast(null, "Video descargado %", "success", 3000);
+                        } catch (error) {
+                            // Manejo de errores al descargar el video
+                            console.error("Error:", error);
+                            alertMessage("Error al descargar", error.message, "error", 3000).finally(() => {
+                                window.location.reload();
+                            });
+                        }
                     }
                 }
             });
@@ -140,7 +141,15 @@ document.querySelector(".main").style.height = `${window.innerHeight}px`;
 // Acciones al cargar el documento
 document.addEventListener("DOMContentLoaded", () => {
     const today = new Date();
-    const formattedDate = today.toISOString().split("T")[0];
+    const formattedDate = today
+        .toLocaleDateString("es-MX", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+        })
+        .split("/")
+        .reverse()
+        .join("-");
 
     // Establecer la fecha actual en el input de fecha
     dateInput.value = formattedDate;
@@ -148,12 +157,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Agregar evento de cambio al input de fecha y cámara
     dateInput.addEventListener("change", () => {
         listVideos.innerHTML = "";
-        createList();
+        createList(cameraInput.value);
     });
 
     cameraInput.addEventListener("change", () => {
         listVideos.innerHTML = "";
-        createList();
+        createList(cameraInput.value);
     });
 
     // Agregar evento de cambio al video
@@ -183,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Crear la lista de videos al cargar la página
-    createList();
+    createList(1);
 
     // Alerta de carga al iniciar la transmisión
     alertLoading("Iniciando transmisión", "Cargando video, por favor espere...");

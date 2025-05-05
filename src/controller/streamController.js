@@ -7,6 +7,7 @@ config();
 // URLs de los streams
 const rtspUrl1 = process.env.STREAM_1;
 const rtspUrl2 = process.env.STREAM_2;
+const rtspUrl3 = process.env.STREAM_3;
 
 // Controlador para obtener el stream 1
 export const stream1Handler = (req, res) => {
@@ -23,12 +24,27 @@ export const stream1Handler = (req, res) => {
     }
 };
 
-// Controlador para obtener el stream 1
+// Controlador para obtener el stream 2
 export const stream2Handler = (req, res) => {
     res.setHeader("Content-Type", "video/matroska");
     try {
         // Creación del stream
         const stream = createStream(rtspUrl2);
+        // Envío del stream al cliente
+        stream.pipe(res);
+    } catch (error) {
+        console.error("Error al crear el stream:", error.message);
+        // Envía un error 500 si hay un problema al crear el stream
+        res.status(500).send("Error al crear el stream");
+    }
+};
+
+// Controlador para obtener el stream 3
+export const stream3Handler = (req, res) => {
+    res.setHeader("Content-Type", "video/matroska");
+    try {
+        // Creación del stream
+        const stream = createStream(rtspUrl3);
         // Envío del stream al cliente
         stream.pipe(res);
     } catch (error) {

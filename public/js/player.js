@@ -166,6 +166,18 @@ document.addEventListener("DOMContentLoaded", () => {
         videoPlayer.play();
     });
 
+    // Agregar evento de error al video
+    videoPlayer.addEventListener("error", () => {
+        alertMessage("Error al cargar video", "No se pudo cargar el video, por favor intente nuevamente.", "error", 3000).finally(() => {
+            window.location.reload();
+        });
+    });
+    videoPlayer.addEventListener("stalled", () => {
+        alertMessage("Error de conexión", "No se pudo cargar el video, por favor intente nuevamente.", "error", 3000).finally(() => {
+            window.location.reload();
+        });
+    });
+
     // Agregar evento de clic al botón de cerrar sesión
     logoutButton.addEventListener("click", async () => {
         try {

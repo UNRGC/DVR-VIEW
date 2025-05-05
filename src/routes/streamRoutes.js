@@ -1,6 +1,6 @@
 import express from "express";
 import authMiddleware from "../middleware/authMiddleware.js";
-import { closeStreamHandler, stream1Handler, stream2Handler } from "../controller/streamController.js";
+import { closeStreamHandler, stream1Handler, stream2Handler, stream3Handler } from "../controller/streamController.js";
 
 // Crea nueva instancia de un router de express
 const router = express.Router();
@@ -9,6 +9,8 @@ const router = express.Router();
 router.get("/1", authMiddleware, stream1Handler);
 // Ruta para obtener el stream de la cámara 2
 router.get("/2", authMiddleware, stream2Handler);
+// Ruta para obtener el stream de la cámara 3
+router.get("/3", authMiddleware, stream3Handler);
 // Ruta para cerrar el stream
 router.delete("/close", authMiddleware, closeStreamHandler);
 

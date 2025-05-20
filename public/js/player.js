@@ -9,6 +9,8 @@ const listVideos = document.getElementById("list");
 
 const logoutButton = document.getElementById("logout");
 
+const hash = window.location.hash.substring(1) || 1;
+
 // Función para obtener la fecha del nombre del video
 const getDate = (filename) => {
     const videoParts = filename.split("_");
@@ -25,6 +27,14 @@ const getTimestamp = (filename) => {
     hours = hours % 12 || 12;
     const formattedTimestamp = `${hours}:${minutes}:${seconds}:${videoMilliseconds} ${ampm}`;
     return formattedTimestamp;
+};
+
+// Función para cambiar la fuente del video
+const changeSource = async (source) => {
+    videoPlayer.src = source;
+    videoPlayer.querySelector("source").src = source;
+    await closeStream();
+    videoPlayer.load();
 };
 
 // Función para obtener la lista de videos
@@ -78,14 +88,6 @@ const createList = async (camera) => {
         // Obtener el nombre del video
         const videoName = video.querySelector("img").src.split("/").pop().split(".jpg")[0];
 
-        // Cambiar la fuente del video
-        const changeSource = async (source) => {
-            videoPlayer.src = source;
-            videoPlayer.querySelector("source").src = source;
-            videoPlayer.load();
-            await closeStream();
-        };
-
         // Agregar evento de clic al video
         video.addEventListener("click", () => {
             // Verificar si el video es en vivo o grabado
@@ -130,77 +132,88 @@ const createList = async (camera) => {
     });
 };
 
-// Ajustar el tamaño del video al tamaño de la ventana
+// Establecer la fecha actual en el input de fecha
+const today = new Date();
+const formattedDate = today
+    .toLocaleDateString("es-MX", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    })
+    .split("/")
+    .reverse()
+    .join("-");
+
+// Establecer la fecha actual en el input de fecha
+dateInput.value = formattedDate;
+
+// Agrega evento de cambio al input de fecha y cámara
+dateInput.addEventListener("change", () => {
+    listVideos.innerHTML = "";
+    createList(cameraInput.value);
+});
+
+// Agrega evento de cambio de hash a la ventana
+window.addEventListener("hashchange", () => {
+    const videoPath = `/stream/${cameraInput.value}`;
+    alertLoading("Iniciando transmisión", "Cargando video, por favor espere...");
+    changeSource(videoPath);
+});
+
+// Agrega evento de cambio al input de cámara
+cameraInput.addEventListener("change", () => {
+    listVideos.innerHTML = "";
+    createList(cameraInput.value);
+    window.location.hash = cameraInput.value;
+});
+
+// Agrega evento de cambio al video
+videoPlayer.addEventListener("loadeddata", () => {
+    alertToast(null, "Video cargado %", "success", 3000);
+    videoPlayer.play();
+});
+
+// Agrega evento de error al video
+videoPlayer.addEventListener("error", () => {
+    alertMessage("Error al cargar video", "No se pudo cargar el video, por favor intente nuevamente.", "error", 3000).finally(() => {
+        window.location.reload();
+    });
+});
+videoPlayer.addEventListener("stalled", () => {
+    alertMessage("Error de conexión", "No se pudo cargar el video, por favor intente nuevamente.", "error", 3000).finally(() => {
+        window.location.reload();
+    });
+});
+
+// Agrega evento de clic al botón de cerrar sesión
+logoutButton.addEventListener("click", async () => {
+    try {
+        // Eliminar la descarga y cerrar sesión
+        await closeStream();
+        await logout();
+    } catch (error) {
+        // Manejo de errores al cerrar sesión
+        console.error("Error:", error);
+        alertMessage("Error al salir", error.message, "error", 3000).finally(() => {
+            window.location.reload();
+        });
+    }
+});
+
+// Cierra la transmisión y elimina las descargas al cerrar la ventana
+window.addEventListener("beforeunload", async () => {
+    await closeStream();
+});
+
+// Ajusta el tamaño del video al tamaño de la ventana
 document.querySelector(".main").style.height = `${window.innerHeight}px`;
 
-// Acciones al cargar el documento
-document.addEventListener("DOMContentLoaded", () => {
-    const today = new Date();
-    const formattedDate = today
-        .toLocaleDateString("es-MX", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-        })
-        .split("/")
-        .reverse()
-        .join("-");
+// Cambia la fuente del video al cargar la página
+cameraInput.value = hash;
+changeSource(`/stream/${cameraInput.value}`);
 
-    // Establecer la fecha actual en el input de fecha
-    dateInput.value = formattedDate;
+// Crear la lista de videos al cargar la página
+createList(hash);
 
-    // Agregar evento de cambio al input de fecha y cámara
-    dateInput.addEventListener("change", () => {
-        listVideos.innerHTML = "";
-        createList(cameraInput.value);
-    });
-
-    cameraInput.addEventListener("change", () => {
-        listVideos.innerHTML = "";
-        createList(cameraInput.value);
-    });
-
-    // Agregar evento de cambio al video
-    videoPlayer.addEventListener("loadeddata", () => {
-        alertToast(null, "Video cargado %", "success", 3000);
-        videoPlayer.play();
-    });
-
-    // Agregar evento de error al video
-    videoPlayer.addEventListener("error", () => {
-        alertMessage("Error al cargar video", "No se pudo cargar el video, por favor intente nuevamente.", "error", 3000).finally(() => {
-            window.location.reload();
-        });
-    });
-    videoPlayer.addEventListener("stalled", () => {
-        alertMessage("Error de conexión", "No se pudo cargar el video, por favor intente nuevamente.", "error", 3000).finally(() => {
-            window.location.reload();
-        });
-    });
-
-    // Agregar evento de clic al botón de cerrar sesión
-    logoutButton.addEventListener("click", async () => {
-        try {
-            // Eliminar la descarga y cerrar sesión
-            await closeStream();
-            await logout();
-        } catch (error) {
-            // Manejo de errores al cerrar sesión
-            console.error("Error:", error);
-            alertMessage("Error al salir", error.message, "error", 3000).finally(() => {
-                window.location.reload();
-            });
-        }
-    });
-
-    // Cierra la transmisión y elimina las descargas al cerrar la ventana
-    window.addEventListener("beforeunload", async () => {
-        await closeStream();
-    });
-
-    // Crear la lista de videos al cargar la página
-    createList(1);
-
-    // Alerta de carga al iniciar la transmisión
-    alertLoading("Iniciando transmisión", "Cargando video, por favor espere...");
-});
+// Alerta de carga al iniciar la transmisión
+alertLoading("Iniciando transmisión", "Cargando video, por favor espere...");
